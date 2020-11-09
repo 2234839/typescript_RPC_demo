@@ -12,7 +12,9 @@
 
 [demo  github 地址](https://github.com/2234839/typescript_RPC_demo)
 
-![image.png](https://shenzilong.cn/record/每日总结/2020/assets/20201109143728-hfw4r7v-image.png)
+下面是效果演示
+![time.ts截图](./static/time.ts截图.png)
+![效果演示](./static/效果演示.png)
 
 #### 0x00 服务端方法
 
@@ -71,7 +73,7 @@ export async function post(req: any, res: any) {
 #### 0x03 TypeScript ! 🎉
 
 ```typescript
-//  rpc.ts 
+//  rpc.ts
 /** ═════════🏳‍🌈 超轻量级的远程调用，完备的类型提示！ 🏳‍🌈═════════  */
 import type * as apis from "./apis";
 type apis = typeof apis;
@@ -140,4 +142,5 @@ API.currentTime2(true).then((r) => console.log("服务器当前时间本地化",
 追求简单的方法，完善类型体验。
 
 > by 崮生 from [崮生 • 一些随笔](https://shenzilong.cn/record/%E6%AF%8F%E6%97%A5%E6%80%BB%E7%BB%93/2020/11%E6%9C%88.html) 🎨
+>
 > 本文欢迎分享与聚合，全文转载未经授权（ [联系我](https://shenzilong.cn/%E5%85%B3%E4%BA%8E/%E7%94%B3%E5%AD%90%E9%BE%99.html#%E6%88%91%E7%9A%84%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F)）不许可。
