@@ -8,8 +8,9 @@
 >
 > 这里提供超轻量级的远程调用，完备的类型提示！
 
-[codesandbox 体验地址](https://codesandbox.io/s/async-sea-16u5k?file=/src/rpc.ts) codesandbox 的类型提示还不太行，本地开发是没有问题的
+[codesandbox 体验地址](https://codesandbox.io/s/github/2234839/typescript_RPC_demo?utm_medium=plugin&file=/src/rpc.ts) codesandbox 的类型提示还不太行，本地开发是没有问题的
 
+[demo  github 地址](https://github.com/2234839/typescript_RPC_demo)
 
 ![image.png](https://shenzilong.cn/record/每日总结/2020/assets/20201109143728-hfw4r7v-image.png)
 
