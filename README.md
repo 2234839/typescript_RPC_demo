@@ -1,49 +1,141 @@
-# sapper-smui-typescript-template
+# 一个简简单单的 TypeScript RPC 解决方案
 
-The default [Sapper](https://github.com/sveltejs/sapper) template using webpack, with included support for [SMUI](https://github.com/hperrin/svelte-material-ui) and [Typescript](https://github.com/microsoft/TypeScript).
+## 一个简简单单的 TypeScript RPC 解决方案
 
-If you don't want Typescript support, have a look at [sapper-smui-template](https://github.com/manuel3108/sapper-smui-template)
+> 有时候不需要什么「分布式」，前后端「项目分离」。
+>
+> 只是想可以方便调用一个接口、不去写接口文档、还有有完善的方法类型提示而已。
+>
+> 何必那么复杂呢。......
+>
+> 这里提供超轻量级的远程调用，完备的类型提示！
+
+[codesandbox 体验地址](https://codesandbox.io/s/async-sea-16u5k?file=/src/rpc.ts) codesandbox 的类型提示还不太行，本地开发是没有问题的
 
 
-## Getting started
+![image.png](https://shenzilong.cn/record/每日总结/2020/assets/20201109143728-hfw4r7v-image.png)
 
+#### 0x00 服务端方法
 
-### Using `degit`
+```typescript
+// apis/time.ts
+export function currentTime() {
+  return Date.now();
+}
 
-[`degit`](https://github.com/Rich-Harris/degit) is a scaffolding tool that lets you create a directory from a branch in a repository:
-
-```bash
-npx degit "manuel3108/sapper-smui-typescript-template" my-app
+export function currentTime2(toLocaleString: boolean) {
+  if (toLocaleString) {
+    return new Date().toLocaleString();
+  } else {
+    return Date.now();
+  }
+}
 ```
 
+这里随便写了几个方法
 
-### Using GitHub templates
+#### 0x01 聚合
 
-Alternatively, you can use GitHub's template feature with this repository.
-
-
-### Running the project
-
-Running the app is as usual:
-
-```bash
-cd my-app
-npm install # or yarn
-npm run dev
+```typescript
+// apis/index.ts
+export * from "./time";
 ```
 
-Open up [localhost:3000](http://localhost:3000) and start clicking around.
+约定俗称的用一个 `index.ts` 文件将其他文件中的方法聚合起来。
 
+#### 0x02 Remote Procedure Call !
 
-## Usage
-At the moment, you will get a standard sapper app created with 
-```bash
-npx degit "sveltejs/sapper-template#webpack" my-app
+Remote Procedure Call 要说的高大上呢那也有很多可以做的细节，但我们追求简简单单。
+
+```typescript
+// router/rpc.ts
+import * as apis from "../apis";
+
+export async function post(req: any, res: any) {
+  const data = [] as any[];
+  req.on("data", function (chunk) {
+    data.push(chunk);
+  });
+  req.on("end", async () => {
+    const { method, data: _data } = JSON.parse(data.join(""));
+    const result = await apis[method](..._data);
+    res.writeHead(200, {
+      "Content-Type": "application/json"
+    });
+    res.end(JSON.stringify(result));
+  });
+}
 ```
-and one additional SMUI Button. As explained in the SMUI repository it is recommended to install each component on its own. So currently you will only be able to use buttons.
 
-If you want to install further components, just do
-```bash
-npm install --save-dev @smui/component-name
+简单的远程调用只需要暴露一个接口让用户可以调用本机方法就行了
+
+#### 0x03 TypeScript ! 🎉
+
+```typescript
+//  rpc.ts 
+/** ═════════🏳‍🌈 超轻量级的远程调用，完备的类型提示！ 🏳‍🌈═════════  */
+import type * as apis from "./apis";
+type apis = typeof apis;
+type method = keyof apis;
+
+/** Remote call ， 会就近的选择是远程调用还是使用本地函数 */
+export function RC<K extends method>(
+  method: K,
+  data: Parameters<apis[K]>
+): Promise<unPromise<ReturnType<apis[K]>>> {
+  if (typeof window !== "undefined") {
+    // 客户端运行
+    return fetch("/rpc", {
+      method: "POST",
+      body: JSON.stringify({ method, data }),
+      headers: {
+        "content-type": "application/json"
+      }
+    }).then((r) => r.json());
+  } else {
+    // 服务端运行，使用 import 的原因是避免 apis 的代码被打包发送到客户端
+    return import("./apis/index").then(async (r: any) => {
+      return await r[method](...data);
+    });
+  }
+}
+
+/** 解开 promise 类型包装 */
+declare type unPromise<T> = T extends Promise<infer R> ? R : T;
+
+// 示例 1 直接使用 RC
+
+RC("currentTime", []).then((r) => console.log("服务器当前时间", r));
+RC("currentTime2", [true]).then((r) => console.log("服务器当前时间本地化", r));
+
+/** 包装了一次的 RC 方便跳转到函数定义  */
+export const API = new Proxy(
+  {},
+  {
+    get(target, p: method) {
+      return (...arg: any) => RC(p, arg);
+    }
+  }
+) as apisPromiseify;
+
+/** apis 中包含的方法可能不是返回 promise 的，但 RC 调用后的一定是返回 promsie */
+type apisPromiseify = {
+  readonly [K in keyof apis]: (
+    ...arg: Parameters<apis[K]>
+  ) => Promise<unPromise<ReturnType<apis[K]>>>;
+};
+
+// 示例 2 通过 API 对象调用对应方法，这里的优点是可以直接跳转到对应函数的源码处
+
+API.currentTime().then((r) => console.log("服务器当前时间", r));
+API.currentTime2(true).then((r) => console.log("服务器当前时间本地化", r));
+
 ```
-**Be sure to add `--save-dev` or `-D` to add those components as dev-Dependencies. They will not work if you install them as normal dependencies.**
+
+上面就是一顿类型操作，打完收工。
+
+接下来无论是在服务端还是客户端通过 RC 或 API 来调用方法获得的体验是一模一样的。
+
+并且通过 API 对象调用对应方法，这里的优点是可以直接跳转到对应函数的源码处。啥类型提示都有，接口文档也没有必要了。
+
+追求简单的方法，完善类型体验。
