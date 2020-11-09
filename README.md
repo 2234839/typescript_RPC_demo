@@ -13,8 +13,8 @@
 [demo  github 地址](https://github.com/2234839/typescript_RPC_demo)
 
 下面是效果演示
-![time.ts截图](./static/time.ts截图.png)
-![效果演示](./static/效果演示.png)
+![time.ts截图](./static/time.ts.png)
+![效果演示](./static/demo.png)
 
 #### 0x00 服务端方法
 
