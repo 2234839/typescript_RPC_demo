@@ -5,8 +5,8 @@ const pkg = require('./package.json');
 const mode = process.env.NODE_ENV;
 const dev = mode === 'development';
 
-const extensions = ['.ts', '.tsx', '.mjs', '.js', '.json', '.svelte', '.html'];
-const mainFields = ['svelte', 'module', 'browser', 'main'];
+const extensions = [ '.ts', '.tsx', '.mjs', '.js', '.json', '.svelte', '.html' ];
+const mainFields = [ 'svelte', 'module', 'browser', 'main' ];
 
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -17,19 +17,19 @@ const sveltePreprocess = require('svelte-preprocess');
 const preprocess = require("./svelte.config.js");
 
 const sassOptions = {
-  includePaths: [
-    './theme',
-    './node_modules',
-  ]
+	includePaths: [
+		'./theme',
+		'./node_modules',
+	]
 };
 
 module.exports = {
 	client: {
 		entry: config.client.entry(),
 		output: config.client.output(),
-		resolve: { 
-			extensions, 
-			mainFields, 
+		resolve: {
+			extensions,
+			mainFields,
 		},
 		module: {
 			rules: [
@@ -59,7 +59,7 @@ module.exports = {
 						},
 					],
 				},
-				{ 
+				{
 					test: /\.tsx?$/,
 					loader: "ts-loader"
 				}
@@ -81,7 +81,7 @@ module.exports = {
 				assetNameRegExp: /\.css$/g,
 				cssProcessor: require('cssnano'),
 				cssProcessorPluginOptions: {
-					preset: ['default', { discardComments: { removeAll: true } }],
+					preset: [ 'default', { discardComments: { removeAll: true } } ],
 				},
 				canPrint: true
 			})
@@ -93,10 +93,10 @@ module.exports = {
 		entry: config.server.entry(),
 		output: config.server.output(),
 		target: 'node',
-		resolve: { 
-			extensions, 
+		resolve: {
+			extensions,
 			mainFields,
-    },
+		},
 		externals: Object.keys(pkg.dependencies).concat('encoding'),
 		module: {
 			rules: [
@@ -126,7 +126,7 @@ module.exports = {
 						},
 					],
 				},
-				{ 
+				{
 					test: /\.tsx?$/,
 					loader: "ts-loader"
 				}
@@ -142,7 +142,7 @@ module.exports = {
 				assetNameRegExp: /\.css$/g,
 				cssProcessor: require('cssnano'),
 				cssProcessorPluginOptions: {
-					preset: ['default', { discardComments: { removeAll: true } }],
+					preset: [ 'default', { discardComments: { removeAll: true } } ],
 				},
 				canPrint: true
 			})

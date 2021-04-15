@@ -6,15 +6,16 @@ type method = keyof apis;
 /** Remote call ， 会就近的选择是远程调用还是使用本地函数 */
 export function RC<K extends method>(
   method: K,
-  data: Parameters<apis[K]>
+  data: Parameters<apis[K]>,
 ): Promise<unPromise<ReturnType<apis[K]>>> {
-  if (typeof window !== "undefined") {
+  //@ts-ignore
+  if (process.browser === true) {
     return fetch("/rpc", {
       method: "POST",
       body: JSON.stringify({ method, data }),
       headers: {
-        "content-type": "application/json"
-      }
+        "content-type": "application/json",
+      },
     }).then((r) => r.json());
   } else {
     //@ts-ignore
@@ -38,8 +39,8 @@ export const API = new Proxy(
   {
     get(target, p: method) {
       return (...arg: any) => RC(p, arg);
-    }
-  }
+    },
+  },
 ) as apisPromiseify;
 
 /** apis 中包含的方法可能不是返回 promise 的，但 RC 调用后的一定是返回 promsie */
