@@ -139,6 +139,32 @@ API.currentTime2(true).then((r) => console.log("服务器当前时间本地化",
 
 并且通过 API 对象调用对应方法，这里的优点是可以直接跳转到对应函数的源码处。啥类型提示都有，接口文档也没有必要了。
 
+## 0x04 安全性问题
+
+从 github 查看此次修改： [e4e674c](https://github.com/2234839/typescript_RPC_demo/commit/e4e674cdcd16791fbaaf525b7c99c9084d550946)
+
+知友提出了下面这个问题
+
+> [![beeplin](https://pic2.zhimg.com/7ec8a4eb75582008f0a79b2e709def92_s.jpg?source=06d4cd63)](https://www.zhihu.com/people/beeplin)[beeplin](https://www.zhihu.com/people/beeplin)**昨天 01:05**
+>
+> 用 dynamic import 通过 webpack 制造一个 永远不会被前端实际加载的 chunk，从而避免后端函数代码被打包到前端，我这个理解正确么？
+>
+> 如果没错的画，有个潜在的问题，这个 chunk 文件依然是放在 dist 目录下的，虽然正常情况下不会去主动加载，但是还是有被用户“偶然”猜对文件名从而加载到前端导致代码泄露的可能。有办法解决这个问题么？
+>
+
+我现在想出来的解决方案就是利用条件编译来使得前端打包时不去 `import("./apis/index")` ,
+
+RC.ts 代码内的条件如下图这样改动，
+
+![图片](https://user-images.githubusercontent.com/28727933/114807304-c6477280-9dd8-11eb-8e35-60b851ab4955.png)
+
+`process.browser` 来自于 webpack 插件的定义
+
+![图片](https://user-images.githubusercontent.com/28727933/114807313-ca739000-9dd8-11eb-84e6-ee7c7d1a09f3.png)
+
+这样改动后当打包前端代码的时候打包工具检测到 `process.browser===true` 一定成立，于是会删去条件不成立分支的代码，之后再对代码进性依赖分析之类的就不会引入 api.ts 中的代码到前端代码中去了
+
+
 #### 总结
 
 这个~~项目~~ 方法 的重点在于复用了服务端提供接口的类型，并且可以直接跳转过去。
